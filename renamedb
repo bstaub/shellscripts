@@ -1,0 +1,29 @@
+#!/bin/bash
+#title           :renamedb.sh
+#description     :simply rename mysql databases
+#author          :bruno staub
+#date            :20130526
+#version         :1.0    
+#usage           :bash rename.db <old_db_name> <new_db_name>
+#notes           :Vim and Emacs are needed to use this script.
+#bash_version    :GNU bash, version 3.2.48(1)-release (x86_64-apple-darwin12)
+#===============================================================================
+
+if [ $# -ne 2 ];then
+
+	usage="usage: $0 <old_db_name> <new_db_name>"
+	echo $usage
+
+else
+
+	mysqlconn="/Applications/MAMP/Library/bin/mysql --host=localhost -uroot -proot"
+	olddb=$1
+	newdb=$2
+
+	$mysqlconn -e "CREATE DATABASE IF NOT EXISTS $newdb"
+	params=$($mysqlconn -N -e "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE table_schema='$olddb'")
+
+	for name in $params; do
+      	$mysqlconn -e "RENAME TABLE $olddb.$name to $newdb.$name";
+	done;
+fi
